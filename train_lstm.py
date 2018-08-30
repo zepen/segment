@@ -14,9 +14,9 @@ with open('dictionary/word2idx.pickle', 'rb') as f:
 def train_lstm_run():
     data_processing = DataProcessing()
     data_processing.load_file('corpus/msr.txt')
-    data_processing.train_transform(word2idx)
+    data_processing.train_transform(word2idx, 0)
     # 获取训练数据
-    train_word_num = data_processing.get_train_word_num()
+    train_data = data_processing.get_train_data()
     train_label = data_processing.get_train_label()
     nb_classes = len(np.unique(train_label))
     # stacking LSTM
@@ -24,10 +24,20 @@ def train_lstm_run():
     net = LongShortTMNet()
     net.init_weight = [np.array(init_weight_wv)]
     net.nb_classes = nb_classes
-    net.split_set(train_word_num, train_label)
-    print("Train...")
-    net.build_net()
-    net.model_fit(model_name, batch_size=128, epochs=20)
+    net.split_set(train_data, train_label)
+    print("The model train is begin...")
+    net.build_net(
+        word_dim=100,
+        max_len=7,
+        hidden_units=100,
+        loss='categorical_crossentropy',
+        optimizer='adam'
+    )
+    net.model_fit(
+        model_file=model_name,
+        batch_size=128,
+        epochs=20
+    )
 
 if __name__ == '__main__':
     # train lstm

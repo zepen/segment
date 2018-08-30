@@ -20,7 +20,7 @@ with open('dictionary/num_dict.pickle', 'rb') as f:
 # 全局加载模型
 data_processing = DataProcessing()
 lstm_net = LongShortTMNet()
-# lstm_net.model_load('my_model_weights')
+lstm_net.model_load('lstm_model.h5')
 
 
 @app.route('/')
@@ -34,10 +34,10 @@ def cut_word():
         if request.method == "POST":
             if request.data is not None:
                 json_to_dict = json.loads(request.data)
-                message = json_to_dict.get("message_content").encode("utf-8")
+                context = json_to_dict.get("context").encode("utf-8")
                 start_time = time.time()
-                x_data = data_processing.predict_transform(message, word2idx)
-                result = lstm_net.cut_word(x_data, message, label_dict, num_dict)
+                x_data = data_processing.predict_transform(context, word2idx)
+                result = lstm_net.cut_word(x_data, context, label_dict, num_dict)
                 end_time = time.time()
                 print(end_time - start_time)
                 return Response(json.dumps({"result": result}))

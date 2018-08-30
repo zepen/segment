@@ -16,9 +16,11 @@ class DataProcessing(object):
         self.input_data = None
         self.output_data = None
         self._x_data = []
-        self._train_word_num = []
         self._train_label = []
+        self._train_data = []
         self._pattern_num = re.compile(r'[0-9]+')
+        self.key_u = u'U'
+        self.key_p = u'P'
 
     def __str__(self):
         return "This is data processing!"
@@ -65,23 +67,14 @@ class DataProcessing(object):
         else:
             raise Exception('The input data is None object!')
 
-    def _save_train_word_num(self, num):
+    def _save_train_data(self, num):
         """
 
         :param num: 文件序号
         :return:
         """
-        with open('train_data/train_word_num' + num + '.pickle', "wb") as f:
-            dump(np.array(self._train_word_num), f)
-
-    def _save_train_label(self, num):
-        """
-
-        :param num: 文件序号
-        :return:
-        """
-        with open('train_data/train_label' + num + '.pickle', "wb") as f:
-            dump(self._train_label, f)
+        with open('train_data/train_data_' + num + '.pickle', "wb") as f:
+            dump(zip(self._train_data, self._train_label), f)
 
     def _save_label_dict(self):
         with open('dictionary/label_dict.pickle', "wb") as f:
@@ -93,15 +86,15 @@ class DataProcessing(object):
 
     def _separation_word_and_label(self):
         self._character_tagging()
-        with open(self.tag_corpus_path) as f:
-            lines = f.readlines()
-            self._train_line = [[w[0] for w in line.split()] for line in lines]
-            self._train_label_ = [w[2] for line in lines for w in line.split()]
         # 建立两个词典
-        self._label_dict = dict(zip(np.unique(self._train_label), range(4)))
+        self._label_dict = dict(zip(['S', 'B', 'M', 'E'], range(4)))
         self._save_label_dict()
         self._num_dict = {n: l for l, n in self._label_dict.items()}
         self._save_num_dict()
+        with open(self.tag_corpus_path) as f:
+            lines = f.readlines()
+            self._train_line = [[w[0] for w in line.split()] for line in lines]
+            self._train_label_ = [[self._label_dict[w[2]] for w in line.split()] for line in lines]
 
     def _feat_context(self, sentence, word2idx, context=7):
         """
@@ -117,16 +110,17 @@ class DataProcessing(object):
             if w in word2idx:
                 predict_word_num.append(word2idx[w])
             else:
-                predict_word_num.append(word2idx[u'U'])
+                predict_word_num.append(word2idx[self.key_u])
         num = len(predict_word_num)  # 首尾padding
         pad = int((context - 1) * 0.5)
         for i in range(pad):
             # 头部添加个元素，尾部也添加个元素
-            predict_word_num.insert(0, word2idx[u'P'])
-            predict_word_num.append(word2idx[u'P'])
+            predict_word_num.insert(0, word2idx[self.key_p])
+            predict_word_num.append(word2idx[self.key_p])
+        x_data = []
         for i in range(num):
-            self._x_data.append(predict_word_num[i:i + context])
-        return self._x_data
+            x_data.append(predict_word_num[i:i + context])
+        return x_data
 
     def _check_memory(self):
         """ 检查机器剩余内存
@@ -137,27 +131,25 @@ class DataProcessing(object):
             while True:
                 mem = f.readline()
                 if 'MemFree' in mem:
-                    print('%s' % mem)
+                    # print('%s' % mem)
                     return int(self._pattern_num.findall(mem)[0])
 
-    def train_transform(self, word2idx):
+    def train_transform(self, word2idx, memory_size):
         """
 
         :param word2idx: 词典word2idx(通过词去查找词序)
+        :param memory_size: 设置机器内存大小，当内存超过设定阈值时，将数据持久化到磁盘
 
         :return:
         """
         self._separation_word_and_label()
         num = 0
-        for line in self._train_line:
-            self._train_word_num.extend(self._feat_context(line, word2idx))
-            self._train_label = [self._label_dict[y] for y in self._train_label]
-            if self._check_memory() > 4500000:
-                self._save_train_word_num(num)
-                len_ = len(self._train_word_num)
-                self._train_word_num.clear()
-                # TODO: 将训练数据批量存放
-                self._save_train_label(num)
+        for index, line in enumerate(self._train_line):
+            self._train_data.extend(self._feat_context(line, word2idx))
+            self._train_label.extend(self._train_label_[index])
+            if self._check_memory() < memory_size:
+                self._save_train_data(num)
+                self._train_data.clear()
                 self._train_label.clear()
             num += 1
 
@@ -170,8 +162,8 @@ class DataProcessing(object):
         """
         return self._feat_context(input_txt, word2idx)
 
-    def get_train_word_num(self):
-        return self._train_word_num
+    def get_train_data(self):
+        return self._train_data
 
     def get_train_label(self):
         return self._train_label

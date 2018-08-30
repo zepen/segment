@@ -15,47 +15,52 @@ class LongShortTMNet(object):
     def __init__(self):
         self.model = Sequential()
         self.init_weight = []
-        self.train_x = []
-        self.train_y = []
-        self.test_x = []
-        self.test_y = []
-        self.batch_size = 128
-        self.word_dim = 100
-        self.max_len = 7
-        self.hidden_units = 100
+        self._train_x = []
+        self._train_y = []
+        self._test_x = []
+        self._test_y = []
+        self._model_path = "model/"
         self.nb_classes = 0
-        self.model_path = "model/"
+        self._vocab_size = 0
 
     def __str__(self):
         return "This is my Lstm model!"
 
-    def build_net(self):
-        print('stacking LSTM...')
+    def build_net(self, **kwargs):
+        self._vocab_size = self.init_weight[0].shape[0]
+        if self._vocab_size == 0:
+            raise Exception('The vocab_size is not be zero!')
         self.model.add(Embedding(
-            self.init_weight[0].shape[0],
-            self.word_dim,
-            input_length=self.max_len,
+            self._vocab_size,
+            kwargs['word_dim'],
+            input_length=kwargs['max_len'],
             trainable=False,
             weights=self.init_weight)
         )
         # 使用了堆叠的LSTM架构
-        self.model.add(LSTM(units=self.hidden_units, return_sequences=True))
-        self.model.add(LSTM(units=self.hidden_units, return_sequences=False))
+        self.model.add(LSTM(units=kwargs['hidden_units'], return_sequences=True))
+        self.model.add(LSTM(units=kwargs['hidden_units'], return_sequences=False))
         self.model.add(Dropout(0.5))
         self.model.add(Dense(self.nb_classes, activation='softmax'))
-        self.model.compile(loss='categorical_crossentropy', optimizer='adam')
+        self.model.compile(loss=kwargs['loss'], optimizer=kwargs['optimizer'])
 
-    def split_set(self, train_word_num, train_label):
+    def split_set(self, train_data, train_label):
         """
 
-        :param train_word_num: 训练词序
+        :param train_data: 训练词序
         :param train_label: 训练标签
         :return:
         """
-        self.train_x, self.test_x, train_y, test_y \
-            = train_test_split(train_word_num, train_label, train_size=0.9, random_state=1)
-        self.train_y = np_utils.to_categorical(train_y, self.nb_classes)
-        self.test_y = np_utils.to_categorical(test_y, self.nb_classes)
+        self._train_x, self._test_x, train_y, test_y \
+            = train_test_split(np.array(train_data), train_label, test_size=0.1, random_state=1)
+        if self.nb_classes == 0:
+            raise Exception("The nb_classes is not be zero!")
+        self._train_y = np_utils.to_categorical(train_y, self.nb_classes)
+        self._test_y = np_utils.to_categorical(test_y, self.nb_classes)
+        print("train_x shape: ", self._train_x.shape)
+        print("train_y shape: ", self._train_y.shape)
+        print("test_x shape: ", self._test_x.shape)
+        print("test_y shape: ", self._test_y.shape)
 
     def model_fit(self, model_file, **kwargs):
         """
@@ -67,14 +72,20 @@ class LongShortTMNet(object):
         batch_size = kwargs['batch_size']
         epochs = kwargs['epochs']
         self.model.fit(
-            self.train_x, self.train_y,
+            self._train_x, self._train_y,
             batch_size=batch_size, epochs=epochs,
-            validation_data=(self.test_x, self.test_y)
+            validation_data=(self._test_x, self._test_y)
         )
         try:
-            self.model.save(self.model_path + model_file + ".h5")
+            self.model.save(self._model_path + model_file + ".h5")
         except Exception as e:
             print("[model_save]" + str(e))
+
+    def model_fit_on_batch(self, x_train, y_train):
+        try:
+            self.model.train_on_batch(x=x_train, y=y_train)
+        except Exception as e:
+            print('[model_train_on_batch]' + str(e))
 
     def model_load(self, model_file):
         """
@@ -83,7 +94,7 @@ class LongShortTMNet(object):
         :return:
         """
         try:
-            self.model = load_model(self.model_path + model_file + ".h5")
+            self.model = load_model(self._model_path + model_file + ".h5")
         except Exception as e:
             print("[model_load]" + str(e))
 

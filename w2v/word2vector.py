@@ -58,9 +58,8 @@ class TrainWord2Vec(object):
 
     def _create_freq_dict(self):
         self._freq_func()
-        zip_ = zip(self.freq_df.word, self.freq_df.idx)
-        self._word2idx = dict((c, i) for c, i in zip_)
-        self._idx2word = dict((i, c) for c, i in zip_)
+        self._word2idx = dict((c, i) for c, i in zip(self.freq_df.word, self.freq_df.idx))
+        self._idx2word = dict((i, c) for c, i in zip(self.freq_df.word, self.freq_df.idx))
 
     def train_word2vec(self, **kwargs):
         corpus = [line.split() for line in self.input_text.split('\n') if line != '']
