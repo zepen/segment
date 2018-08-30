@@ -3,15 +3,17 @@
 定义数据预处理类
 """
 import re
+import os
 import codecs
-import numpy as np
 from pickle import dump
 
 
 class DataProcessing(object):
 
     def __init__(self):
-        self.tag_corpus_path = 'corpus/msr.tagging.utf8'
+        self._tag_corpus_path = 'corpus/msr.tagging.utf8'
+        self._train_data_path = 'train_data/'
+        self._dictionary_path = 'dictionary/'
         self.input_text = None
         self.input_data = None
         self.output_data = None
@@ -21,6 +23,7 @@ class DataProcessing(object):
         self._pattern_num = re.compile(r'[0-9]+')
         self.key_u = u'U'
         self.key_p = u'P'
+        self.status = 0
 
     def __str__(self):
         return "This is data processing!"
@@ -41,7 +44,7 @@ class DataProcessing(object):
         """ 加入标注标签 B M E S
         :return:
         """
-        self.output_data = codecs.open(self.tag_corpus_path, 'w', 'utf-8')
+        self.output_data = codecs.open(self._tag_corpus_path, 'w', 'utf-8')
         if self.input_data is not None:
             print("character tagging...")
             for line in self.input_text:
@@ -73,15 +76,23 @@ class DataProcessing(object):
         :param num: 文件序号
         :return:
         """
-        with open('train_data/train_data_' + num + '.pickle', "wb") as f:
+        if isinstance(num, int):
+            num = str(num)
+        if os.path.exists(self._train_data_path) is False:
+            os.mkdir(self._train_data_path)
+        with open(self._train_data_path + 'train_data_' + num + '.pickle', "wb") as f:
             dump(zip(self._train_data, self._train_label), f)
 
     def _save_label_dict(self):
-        with open('dictionary/label_dict.pickle', "wb") as f:
+        if os.path.exists(self._dictionary_path) is False:
+            os.mkdir(self._dictionary_path)
+        with open(self._dictionary_path + 'label_dict.pickle', "wb") as f:
             dump(self._label_dict, f)
 
     def _save_num_dict(self):
-        with open('dictionary/num_dict.pickle', "wb") as f:
+        if os.path.exists(self._dictionary_path) is False:
+            os.mkdir(self._dictionary_path)
+        with open(self._dictionary_path + 'num_dict.pickle', "wb") as f:
             dump(self._num_dict, f)
 
     def _separation_word_and_label(self):
@@ -148,10 +159,12 @@ class DataProcessing(object):
             self._train_data.extend(self._feat_context(line, word2idx))
             self._train_label.extend(self._train_label_[index])
             if self._check_memory() < memory_size:
+                self.status = 1
                 self._save_train_data(num)
                 self._train_data.clear()
                 self._train_label.clear()
             num += 1
+        self._save_train_data('all')
 
     def predict_transform(self, input_txt, word2idx):
         """
@@ -163,7 +176,13 @@ class DataProcessing(object):
         return self._feat_context(input_txt, word2idx)
 
     def get_train_data(self):
-        return self._train_data
+        if self.status == 0:
+            return self._train_data
+        else:
+            raise Exception("The train_data is so big, So this function doesn't to work!")
 
     def get_train_label(self):
-        return self._train_label
+        if self.status == 0:
+            return self._train_label
+        else:
+            raise Exception("The train_label is so big, So this function doesn't to work!")

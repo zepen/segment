@@ -1,12 +1,14 @@
 """
 定义模型类
 """
+import os
 import numpy as np
 from keras.utils import np_utils
 from keras.models import Sequential, load_model
 from keras.layers.core import Dense, Dropout
 from keras.layers.embeddings import Embedding
 from keras.layers.recurrent import LSTM
+from keras.callbacks import TensorBoard, EarlyStopping
 from sklearn.model_selection import train_test_split
 
 
@@ -35,14 +37,20 @@ class LongShortTMNet(object):
             kwargs['word_dim'],
             input_length=kwargs['max_len'],
             trainable=False,
-            weights=self.init_weight)
+            weights=self.init_weight,
+            name='embed_layer'
+           )
         )
         # 使用了堆叠的LSTM架构
-        self.model.add(LSTM(units=kwargs['hidden_units'], return_sequences=True))
-        self.model.add(LSTM(units=kwargs['hidden_units'], return_sequences=False))
+        self.model.add(LSTM(units=kwargs['hidden_units'], return_sequences=True, name='lstm_layer_1'))
+        self.model.add(LSTM(units=kwargs['hidden_units'], return_sequences=False, name='lstm_layer_2'))
         self.model.add(Dropout(0.5))
-        self.model.add(Dense(self.nb_classes, activation='softmax'))
-        self.model.compile(loss=kwargs['loss'], optimizer=kwargs['optimizer'])
+        self.model.add(Dense(self.nb_classes, activation='softmax', name='output_layer'))
+        self.model.compile(
+            loss=kwargs['loss'],
+            optimizer=kwargs['optimizer'],
+            metrics=['accuracy']
+        )
 
     def split_set(self, train_data, train_label):
         """
@@ -57,10 +65,9 @@ class LongShortTMNet(object):
             raise Exception("The nb_classes is not be zero!")
         self._train_y = np_utils.to_categorical(train_y, self.nb_classes)
         self._test_y = np_utils.to_categorical(test_y, self.nb_classes)
-        print("train_x shape: ", self._train_x.shape)
-        print("train_y shape: ", self._train_y.shape)
-        print("test_x shape: ", self._test_x.shape)
-        print("test_y shape: ", self._test_y.shape)
+        for s in zip(['train_x_shape', 'train_y_shape', 'test_x_shape', 'test_y_shape'],
+                     [self._train_x, self._train_y, self._test_x, self._test_x]):
+            print(s[0], ":", s[1].shape)
 
     def model_fit(self, model_file, **kwargs):
         """
@@ -71,10 +78,15 @@ class LongShortTMNet(object):
         """
         batch_size = kwargs['batch_size']
         epochs = kwargs['epochs']
+        if os.path.exists('logs/') is False:
+            os.mkdir('logs/')
+        tensor_board = TensorBoard(embeddings_layer_names='embed_layer')
+        early_stop = EarlyStopping(patience=10)
         self.model.fit(
             self._train_x, self._train_y,
             batch_size=batch_size, epochs=epochs,
-            validation_data=(self._test_x, self._test_y)
+            validation_data=(self._test_x, self._test_y),
+            callbacks=[tensor_board, early_stop]
         )
         try:
             self.model.save(self._model_path + model_file + ".h5")

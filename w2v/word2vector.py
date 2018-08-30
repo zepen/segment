@@ -1,6 +1,7 @@
 """
 定义训练词向量类
 """
+import os
 import codecs
 import pandas as pd
 import numpy as np
@@ -13,17 +14,19 @@ from pickle import dump
 class TrainWord2Vec(object):
 
     def __init__(self):
-        self.corpus_path="corpus/msr.txt"
+        self.corpus_path = "corpus/msr.txt"
         self.input_text = None
         self.freq_df = None
+        self._dictionary_path = 'dictionary/'
         self._w2v = None
-        self._w2v_path = "model/word_vector.bin"
+        self._model_path = 'model/'
+        self._w2v_path = self._model_path + 'word_vector.bin'
         self._word2idx = {}
-        self._word2idx_path = 'dictionary/word2idx.pickle'
+        self._word2idx_path = self._dictionary_path  + 'word2idx.pickle'
         self._idx2word = {}
-        self._idx2word_path = 'dictionary/idx2word.pickle'
+        self._idx2word_path = self._dictionary_path + 'idx2word.pickle'
         self._init_weight_wv = []
-        self._init_weight_wv_path = 'model/init_weight_wv.pickle'
+        self._init_weight_wv_path = self._model_path + 'init_weight_wv.pickle'
 
     def __str__(self):
         return "This is train word2vector!"
@@ -106,12 +109,16 @@ class TrainWord2Vec(object):
         self._save_init_weight()
 
     def _save_w2v(self):
+        if os.path.exists(self._model_path) is False:
+            os.mkdir(self._model_path)
         if self._w2v is not None:
             self._w2v.save(self._w2v_path)
         else:
             raise Exception("The w2v object is None!")
 
     def _save_init_weight(self):
+        if os.path.exists(self._model_path) is False:
+            os.mkdir(self._model_path)
         if self._init_weight_wv is not None:
             with open(self._init_weight_wv_path, "wb") as f:
                 dump(self._init_weight_wv, f)
@@ -119,6 +126,8 @@ class TrainWord2Vec(object):
             raise Exception("The init_weight_wv object is None!")
 
     def _save_idx2word(self):
+        if os.path.exists(self._dictionary_path):
+            os.mkdir(self._dictionary_path)
         if self._idx2word is not None:
             with open(self._idx2word_path, "wb") as f:
                 dump(self._idx2word, f)
@@ -126,6 +135,8 @@ class TrainWord2Vec(object):
             raise Exception("The idx2word object is None!")
 
     def _save_word2idx(self):
+        if os.path.exists(self._dictionary_path):
+            os.mkdir(self._dictionary_path)
         if self._word2idx is not None:
             with open(self._word2idx_path, "wb") as f:
                 dump(self._word2idx, f)
