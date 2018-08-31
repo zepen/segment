@@ -31,22 +31,22 @@ def main():
 @app.route('/cut_word', methods=['POST', 'GET'])
 def cut_word():
     try:
-        if request.method == "POST":
-            if request.data is not None:
-                json_to_dict = json.loads(request.data)
-                context = json_to_dict.get("context").encode("utf-8")
+        if request.method == 'POST':
+            if len(request.form) != 0:
+                context = request.form['sequences']
+                # context = json_to_dict.get("context").encode("utf-8")
                 start_time = time.time()
                 x_data = data_processing.predict_transform(context, word2idx)
                 result = lstm_net.cut_word(x_data, context, label_dict, num_dict)
                 end_time = time.time()
-                print(end_time - start_time)
-                return Response(json.dumps({"result": result}))
+                print("Cost time is: ", end_time - start_time)
+                return render_template('predict_message_test.html', result=result)
             else:
                 data_warn = {"warning": "No words to cut!"}
                 return Response(json.dumps(data_warn))
         else:
-            # method_warn = {"warning": "request method is wrong!"}
-            return render_template('predict_message_test.html')
+            method_warn = {"warning": "request method is wrong!"}
+            # return render_template('predict_message_test.html')
     except Exception as e:
         print(e)
 

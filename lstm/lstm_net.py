@@ -3,6 +3,7 @@
 """
 import os
 import numpy as np
+import tensorflow as tf
 from keras.utils import np_utils
 from keras.models import Sequential, load_model
 from keras.layers.core import Dense, Dropout
@@ -24,6 +25,7 @@ class LongShortTMNet(object):
         self._model_path = "model/"
         self.nb_classes = 0
         self._vocab_size = 0
+        self._graph = None
 
     def __str__(self):
         return "This is my Lstm model!"
@@ -106,7 +108,8 @@ class LongShortTMNet(object):
         :return:
         """
         try:
-            self.model = load_model(self._model_path + model_file + ".h5")
+            self._graph = tf.get_default_graph()
+            self.model = load_model(self._model_path + model_file + ".h5", compile=False)
         except Exception as e:
             print("[model_load]" + str(e))
 
@@ -118,44 +121,57 @@ class LongShortTMNet(object):
         :return:
         """
         input_num = np.array(input_num)
-        predict_prob = self.model.predict_proba(input_num, verbose=False)
-        predict_label = self.model.predict_classes(input_num, verbose=False)
-        for i, label in enumerate(predict_label[:-1]):
-            if i == 0:  # 如果首字， 不可为E， M
-                predict_prob[i, label_dict[u'E']] = 0
-                predict_prob[i, label_dict[u'M']] = 0
-            if label == label_dict[u'B']:  # 前字为B， 后字不可为B， S
-                predict_prob[i + 1, label_dict[u'B']] = 0
-                predict_prob[i + 1, label_dict[u'S']] = 0
-            if label == label_dict[u'E']:  # 前字为E， 后字不可为M， E
-                predict_prob[i + 1, label_dict[u'M']] = 0
-                predict_prob[i + 1, label_dict[u'E']] = 0
-            if label == label_dict[u'M']:  # 前字为M， 后字不可为B， S
-                predict_prob[i + 1, label_dict[u'B']] = 0
-                predict_prob[i + 1, label_dict[u'S']] = 0
-            if label == label_dict[u'S']:  # 前字为S， 后字不可为M， E
-                predict_prob[i + 1, label_dict[u'M']] = 0
-                predict_prob[i + 1, label_dict[u'E']] = 0
-            # 前面处理将常理不能标注的发生的概率重置为零
-            predict_label[i+1] = predict_prob[i+1].argmax()
-        return predict_label
+        predict_prob, predict_label = None, None
+        try:
+            with self._graph.as_default():
+                predict_prob = self.model.predict_proba(input_num)
+        except Exception as e:
+            print('[predict_prob]' + str(e))
+        try:
+            with self._graph.as_default():
+                predict_label = self.model.predict_classes(input_num)
+        except Exception as e:
+            print('[predict_label]' + str(e))
+        if (predict_label is not None) or (predict_prob is not None):
+            for i, label in enumerate(predict_label[:-1]):
+                if i == 0:  # 如果首字， 不可为E， M
+                    predict_prob[i, label_dict[u'E']] = 0
+                    predict_prob[i, label_dict[u'M']] = 0
+                if label == label_dict[u'B']:  # 前字为B， 后字不可为B， S
+                    predict_prob[i + 1, label_dict[u'B']] = 0
+                    predict_prob[i + 1, label_dict[u'S']] = 0
+                if label == label_dict[u'E']:  # 前字为E， 后字不可为M， E
+                    predict_prob[i + 1, label_dict[u'M']] = 0
+                    predict_prob[i + 1, label_dict[u'E']] = 0
+                if label == label_dict[u'M']:  # 前字为M， 后字不可为B， S
+                    predict_prob[i + 1, label_dict[u'B']] = 0
+                    predict_prob[i + 1, label_dict[u'S']] = 0
+                if label == label_dict[u'S']:  # 前字为S， 后字不可为M， E
+                    predict_prob[i + 1, label_dict[u'M']] = 0
+                    predict_prob[i + 1, label_dict[u'E']] = 0
+                # 前面处理将常理不能标注的发生的概率重置为零
+                predict_label[i+1] = predict_prob[i+1].argmax()
+            return predict_label
 
     def cut_word(self, input_num, input_txt, label_dict, num_dict):
         predict_label = self.predict_label(input_num, label_dict=label_dict)
-        predict_label_new = [num_dict[x] for x in predict_label]
-        predict_str = []
-        zip_ = zip(input_txt, predict_label_new)
-        for index, v in enumerate(zip_):
-            w, l = v
-            if l == 'S':
-                predict_str.append(w)
-            elif l == 'B':
-                str_ = ''
-                while 1:
-                    str_ += zip_[index][0]
-                    index += 1
-                    if zip_[index][1] == 'E':
+        if predict_label is not None:
+            predict_label_new = [num_dict[x] for x in predict_label]
+            predict_str = []
+            zip_ = [x for x in zip(input_txt, predict_label_new)]
+            for index, v in enumerate(zip_):
+                w, l = v
+                if l == 'S':
+                    predict_str.append(w)
+                elif l == 'B':
+                    str_ = ''
+                    while 1:
                         str_ += zip_[index][0]
-                        break
-                predict_str.append(str_)
-        return predict_str
+                        index += 1
+                        if zip_[index][1] == 'E':
+                            str_ += zip_[index][0]
+                            break
+                    predict_str.append(str_)
+            return "|".join(predict_str)
+        else:
+            return ""
