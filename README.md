@@ -1,4 +1,10 @@
 ### 基于word2vec + LSTM的分词器
+
+### 项目环境
+##### 开发环境: centos7, python3.5.0
+##### 依赖python库: flask.1.0.2, keras.2.1.5, gensim.3.2.0, tensorflow.1.4.1, nltk.3.2.5, sklearn.0.19.1
+
+### 脚本说明
 ##### 1.train_lstm.py 用于训练lstm模型
 ##### 2.train_word2vec.py 用于训练word2vec词向量
 ##### 3.serve_run.py 用于启动预测服务 
