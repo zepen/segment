@@ -102,7 +102,7 @@ class DataProcessing(object):
         self._save_label_dict()
         self._num_dict = {n: l for l, n in self._label_dict.items()}
         self._save_num_dict()
-        with open(self.tag_corpus_path) as f:
+        with open(self._tag_corpus_path) as f:
             lines = f.readlines()
             self._train_line = [[w[0] for w in line.split()] for line in lines]
             self._train_label_ = [[self._label_dict[w[2]] for w in line.split()] for line in lines]

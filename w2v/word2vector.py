@@ -22,7 +22,7 @@ class TrainWord2Vec(object):
         self._model_path = 'model/'
         self._w2v_path = self._model_path + 'word_vector.bin'
         self._word2idx = {}
-        self._word2idx_path = self._dictionary_path  + 'word2idx.pickle'
+        self._word2idx_path = self._dictionary_path + 'word2idx.pickle'
         self._idx2word = {}
         self._idx2word_path = self._dictionary_path + 'idx2word.pickle'
         self._init_weight_wv = []
@@ -126,7 +126,7 @@ class TrainWord2Vec(object):
             raise Exception("The init_weight_wv object is None!")
 
     def _save_idx2word(self):
-        if os.path.exists(self._dictionary_path):
+        if os.path.exists(self._dictionary_path) is False:
             os.mkdir(self._dictionary_path)
         if self._idx2word is not None:
             with open(self._idx2word_path, "wb") as f:
@@ -135,7 +135,7 @@ class TrainWord2Vec(object):
             raise Exception("The idx2word object is None!")
 
     def _save_word2idx(self):
-        if os.path.exists(self._dictionary_path):
+        if os.path.exists(self._dictionary_path) is False:
             os.mkdir(self._dictionary_path)
         if self._word2idx is not None:
             with open(self._word2idx_path, "wb") as f:
