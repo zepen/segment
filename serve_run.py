@@ -45,8 +45,8 @@ def cut_word():
                 data_warn = {"warning": "No words to cut!"}
                 return Response(json.dumps(data_warn))
         else:
-            method_warn = {"warning": "request method is wrong!"}
-            # return render_template('predict_message_test.html')
+            # method_warn = {"warning": "request method is wrong!"}
+            return render_template('predict_message_test.html')
     except Exception as e:
         print(e)
 

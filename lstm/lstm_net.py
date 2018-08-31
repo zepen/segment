@@ -172,6 +172,6 @@ class LongShortTMNet(object):
                             str_ += zip_[index][0]
                             break
                     predict_str.append(str_)
-            return "|".join(predict_str)
+            return " | ".join(predict_str)
         else:
             return ""
