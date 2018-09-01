@@ -14,3 +14,6 @@
 ###### step_1. 先执行train_word2vec.py 进行词向量训练
 ###### step_2. 再执行train_lstm.py 训练lstm模型
 ###### step_3. 最后启动 serve_run.py 服务
+
+#### References
+##### [1]郑捷，汉语自然语言处理原理与实践[M].北京：电子工业出版社，2017年1月.
