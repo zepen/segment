@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from pickle import load
-from lstm.lstm_net import LongShortTMNet, np
+from lstm.lstm_net import LongShortTMNet, np, os
 from lstm.processing import DataProcessing
+
+os.environ['TF_CPP_MIN_LOS_LEVEL'] = '3'
 
 # 加载入初始化向量
 with open('model/init_weight_wv.pickle', 'rb') as f:
@@ -38,6 +40,7 @@ def train_lstm_run():
         batch_size=128,
         epochs=20
     )
+
 
 if __name__ == '__main__':
     # train lstm

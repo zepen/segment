@@ -18,5 +18,6 @@ def train_w2v_run():
     )
     train_word2vec.transform_func()
 
+
 if __name__ == '__main__':
     train_w2v_run()

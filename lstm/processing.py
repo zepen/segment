@@ -4,7 +4,9 @@
 """
 import re
 import os
+import sys
 import codecs
+import psutil
 from pickle import dump
 
 
@@ -102,7 +104,7 @@ class DataProcessing(object):
         self._save_label_dict()
         self._num_dict = {n: l for l, n in self._label_dict.items()}
         self._save_num_dict()
-        with open(self._tag_corpus_path) as f:
+        with open(self._tag_corpus_path, encoding='utf-8') as f:
             lines = f.readlines()
             self._train_line = [[w[0] for w in line.split()] for line in lines]
             self._train_label_ = [[self._label_dict[w[2]] for w in line.split()] for line in lines]
@@ -138,12 +140,14 @@ class DataProcessing(object):
 
         :return:
         """
-        with open('/proc/meminfo') as f:
-            while True:
-                mem = f.readline()
-                if 'MemFree' in mem:
-                    # print('%s' % mem)
-                    return int(self._pattern_num.findall(mem)[0])
+        if sys.platform == 'linux':
+            with open('/proc/meminfo') as f:
+                while True:
+                    mem = f.readline()
+                    if 'MemFree' in mem:
+                        return int(self._pattern_num.findall(mem)[0])
+        if sys.platform == 'win32':
+            return psutil.virtual_memory().available / 1024 / 1024 / 1024
 
     def train_transform(self, word2idx, memory_size):
         """

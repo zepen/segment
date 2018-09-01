@@ -2,7 +2,8 @@
 
 ### 项目环境
 ##### 开发环境: centos7, python3.5.0
-##### 依赖python库: flask.1.0.2, keras.2.1.5, gensim.3.2.0, tensorflow.1.4.1, nltk.3.2.5, sklearn.0.19.1
+##### 依赖python库: flask.1.0.2, keras.2.1.5, gensim.3.2.0, tensorflow.1.4.1, nltk.3.2.5, sklearn.0.19.1, pandas.0.21.0 h5py.2.8.0
+##### windos 需要安装 psutil.5.4.0
 
 ### 脚本说明
 ##### 1.train_lstm.py 用于训练lstm模型
