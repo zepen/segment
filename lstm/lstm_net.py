@@ -46,6 +46,17 @@ class LongShortTMNet(object):
         # 使用了堆叠的LSTM架构
         self.model.add(LSTM(units=kwargs['hidden_units'], return_sequences=True, name='lstm_layer_1'))
         self.model.add(LSTM(units=kwargs['hidden_units'], return_sequences=False, name='lstm_layer_2'))
+        add_layers = set(kwargs.keys()) & set(['add_layer_' + str(i) for i in range(100)])
+        if len(add_layers) != 0:
+            add_layers = list(add_layers)
+            for layer in add_layers:
+                try:
+                    self._add_layer(layer)
+                except Exception as e:
+                    print("[INFO]" + str(e))
+                    break
+        else:
+            print("** Use default model **")
         self.model.add(Dropout(0.5))
         self.model.add(Dense(self.nb_classes, activation='softmax', name='output_layer'))
         self.model.compile(
@@ -53,6 +64,16 @@ class LongShortTMNet(object):
             optimizer=kwargs['optimizer'],
             metrics=['accuracy']
         )
+
+    def _add_layer(self, layer):
+        """
+
+        :param layer: 添加新层
+        :return:
+        """
+        if isinstance(layer, Dense):
+            self.model.add(layer)
+        raise Exception("The layer object is not be suppose!")
 
     def split_set(self, train_data, train_label):
         """
@@ -110,11 +131,12 @@ class LongShortTMNet(object):
         try:
             self._graph = tf.get_default_graph()
             self.model = load_model(self._model_path + model_file + ".h5", compile=False)
+            print("[INFO] The Lstm model is load!")
         except Exception as e:
             print("[model_load]" + str(e))
 
     def predict_label(self, input_num, label_dict):
-        """
+        """ 预测标签处理，将常理不能发生的标注概率重置为零
 
         :param input_num:
         :param label_dict:
@@ -149,7 +171,6 @@ class LongShortTMNet(object):
                 if label == label_dict[u'S']:  # 前字为S， 后字不可为M， E
                     predict_prob[i + 1, label_dict[u'M']] = 0
                     predict_prob[i + 1, label_dict[u'E']] = 0
-                # 前面处理将常理不能标注的发生的概率重置为零
                 predict_label[i+1] = predict_prob[i+1].argmax()
             return predict_label
 

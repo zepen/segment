@@ -2,12 +2,17 @@
 """
 该脚本用于将预料训练为词向量
 """
+import os
 from w2v.word2vector import TrainWord2Vec
+
+CORPUS_PATH = 'corpus/msr.txt'
+if os.path.exists(CORPUS_PATH) is False:
+    print("[WARN] The corpus file is not exist, please find it!")
 
 
 def train_w2v_run():
     train_word2vec = TrainWord2Vec()
-    train_word2vec.load_file('corpus/msr.txt')
+    train_word2vec.load_file(CORPUS_PATH)
     train_word2vec.train_word2vec(
         epochs=20,
         num_features=100,
