@@ -65,6 +65,11 @@ class TrainWord2Vec(object):
         self._idx2word = dict((i, c) for c, i in zip(self.freq_df.word, self.freq_df.idx))
 
     def train_word2vec(self, **kwargs):
+        """
+
+        :param kwargs:
+        :return:
+        """
         corpus = [line.split() for line in self.input_text.split('\n') if line != '']
         self._w2v = word2vec.Word2Vec(
             workers=kwargs['num_workers'],

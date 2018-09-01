@@ -3,10 +3,10 @@ from pickle import load
 from lstm.lstm_net import LongShortTMNet, np, os
 from lstm.processing import DataProcessing
 
-os.environ['TF_CPP_MIN_LOS_LEVEL'] = '3'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 INIT_WEIGHT_WV_PATH = 'model/init_weight_wv.pickle'
-VOCAB_DICT = 'dictionary/word2idx.pickle'
+VOCAB_DICT_PATH = 'dictionary/word2idx.pickle'
 
 # 加载入初始化向量
 if os.path.exists(INIT_WEIGHT_WV_PATH):
@@ -14,10 +14,10 @@ if os.path.exists(INIT_WEIGHT_WV_PATH):
         init_weight_wv = load(f)
     print("[INFO] The init_weight_wv is load!")
 else:
-    print("[WARN] The init_weight_wv.pickle is not exist, so must be run train_word2vec.py")
+    print("[WARN] The init_weight_wv.pickle is not exist! so must be run train_word2vec.py")
 # 加载词典
-if os.path.exists(VOCAB_DICT):
-    with open(VOCAB_DICT, 'rb') as f:
+if os.path.exists(VOCAB_DICT_PATH):
+    with open(VOCAB_DICT_PATH, 'rb') as f:
         vocab_dict = load(f)
     print("[INFO] The vocab_dict is load!")
 else:

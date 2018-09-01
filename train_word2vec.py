@@ -3,6 +3,12 @@
 该脚本用于将预料训练为词向量
 """
 import os
+import warnings
+warnings.filterwarnings(
+    action='ignore',
+    category=UserWarning,
+    module='gensim'
+)
 from w2v.word2vector import TrainWord2Vec
 
 CORPUS_PATH = 'corpus/msr.txt'

@@ -31,6 +31,11 @@ class LongShortTMNet(object):
         return "This is my Lstm model!"
 
     def build_net(self, **kwargs):
+        """  建立模型
+
+        :param kwargs:
+        :return:
+        """
         self._vocab_size = self.init_weight[0].shape[0]
         if self._vocab_size == 0:
             raise Exception('The vocab_size is not be zero!')
@@ -74,6 +79,12 @@ class LongShortTMNet(object):
         if isinstance(layer, Dense):
             self.model.add(layer)
         raise Exception("The layer object is not be suppose!")
+
+    def get_model_structure(self):
+        """ 获取模型结构
+        :return:
+        """
+        self.model.summary()
 
     def split_set(self, train_data, train_label):
         """
@@ -175,6 +186,14 @@ class LongShortTMNet(object):
             return predict_label
 
     def cut_word(self, input_num, input_txt, label_dict, num_dict):
+        """
+
+        :param input_num: 输入词序列
+        :param input_txt: 输入文本
+        :param label_dict: 输入{文本标签:数值标签}
+        :param num_dict: 输入{数值标签:文本标签}
+        :return:
+        """
         predict_label = self.predict_label(input_num, label_dict=label_dict)
         if predict_label is not None:
             predict_label_new = [num_dict[x] for x in predict_label]

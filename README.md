@@ -15,5 +15,24 @@
 ###### step_2. 再执行train_lstm.py 训练lstm模型
 ###### step_3. 最后启动 serve_run.py 服务
 
-#### 四、References
+#### 四、模型结构
+###### 通过调用get_model_structureh函数查看
+
+#### 五、模型评估
+| 超参数 | 参数说明 |
+| ---- | ---- |
+| word_dim | 词向量长度 |
+| max_len | 最大窗口 |
+| hidden_units | 隐藏节点数 |
+| batch_size | 批量训练数据大小 |
+| epochs | 迭代次数 |
+| val_loss | 验证集上损失函数值 |
+| val_acc | 验证集上模型准确率 | 
+
+| word_dim| max_len | hidden_units | batch_size | epochs | val_loss| val_acc |
+| ---- | ---- | ---- | ---- | ---- | ---- | ---- |
+| 100 | 7 | 100 | 128 | 20 | 0.2038 | 92.7% | 
+
+
+#### 六、References
 ##### [1]郑捷，NLP汉语自然语言处理原理与实践[M].北京：电子工业出版社，2017年1月.
