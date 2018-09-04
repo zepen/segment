@@ -205,9 +205,11 @@ class LongShortTMNet(object):
                     predict_str.append(w)
                 elif l == 'B':
                     str_ = ''
-                    while 1:
+                    while index < len(zip_):
                         str_ += zip_[index][0]
                         index += 1
+                        if index == len(zip_):
+                            break
                         if zip_[index][1] == 'E':
                             str_ += zip_[index][0]
                             break
