@@ -1,46 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
-<style>
-.div-a{ float:left;width:50%;}
-.div-b{ float:left;width:50%;}
-</style>
 <head>
-    <meta charset="UTF-8">
-    <!-- Bootstrap -->
-    <link href="static/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <title>sms</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.css" rel="stylesheet">
 </head>
 <body>
-    <script src="http://code.jquery.com/jquery.js"></script>
-    <script src="static/js/bootstrap.min.js"></script>
-      <div class="navbar-inner">
-          <h4 class="brand">cut word</h4>
-          <ul class="nav"></ul>
-      </div>
+
+
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">LSTM分词</a>
+        </div>
+        <!-- <div>
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">分词</a></li>
+                <li><a href="#">机器人</a></li>
+            </ul>
+        </div> -->
+        </div>
+    </nav>
+
+
+
     <div class="div-a">
-        <form  style="margin:20px;" method="post">
-            <div>
-                <label style="height: 20px;font-size: 18px;">Input sequences: </label>
+        <div class="container">
+            <div class="row">
+
+
+                <div class="col-md-6">
+                    <form  method="post" class="bs-example bs-example-form" role="form">
+                        <div class="form-group">
+                            <textarea id="word" class="form-control" rows="3" style="height:100%;height: 87vh;min-height:520px;padding:10px 10px 10px 30px;border:0;border-right:solid 1px #E5EBEE;border-bottom:solid 1px #eee;border-radius:0;resize: none; outline:none;font-size:10px;" placeholder="请输入需要分词的文本..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <div class="panel panel-default" style="height:100%;height: 87vh;min-height:520px;">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">
+                                <span id="sub" style="cursor:pointer">
+                                    <i class="fa fa-toggle-right"></i> 
+                                </span>
+                                <span id="download" style="cursor:pointer;margin-left: 10px" >
+                                    <i class="fa fa-save"></i>
+                                </span>
+                            </h3>
+                        </div>
+                        <div class="panel-body" id="result_txt"></div>
+                    </div>
+                </div>
+
+
             </div>
-            <div>
-                <textarea name="sequences" style="width:100%;height:100px;"></textarea>
-            </div>
-            <div>
-                <button type="submit" id="predictBtn" style="width:100px;height:30px;">predict</button>
-            </div>
-            <p></p>
-            <div>
-                <label style="height: 20px;font-size: 18px">cut word result: </label>
-            </div>
-            {% if result %}
-            <h4 class="brand" style="color:#2f96b4">{{ result }}</h4>
-            {% endif %}
-            <div>
-            {% if error %}
-            <h4 class="brand" style="color:red">{{ error }}!</h4>
-            {% endif %}
-            </div>
-        </form>
+        </div>
+        
     </div>
 </body>
+<script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://cdn.bootcss.com/FileSaver.js/2014-11-29/FileSaver.js"></script>
+<script type="text/javascript">
+$(function() {
+    $('#sub').click(function() {
+        $.ajax({
+            url: '/cut_word',
+            data: {"sequences":$('#word').val()},
+            type: 'POST',
+            success: function(response) {
+                console.log(response);
+                $("#result_txt").val(response)
+
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    });
+    $('#download').click(function(){
+        console.log("保存")
+        text=$(".panel-body").text()
+        if (text.length>0) {
+            var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
+            saveAs(blob, "unnamed.txt");
+        }else{
+            console.log("结果为空!")
+        }
+
+        
+        
+
+    });
+
+
+});
+</script>
 </html>

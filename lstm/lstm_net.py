@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 """
 定义模型类
 """
@@ -154,6 +155,7 @@ class LongShortTMNet(object):
         :return:
         """
         input_num = np.array(input_num)
+
         predict_prob, predict_label = None, None
         try:
             with self._graph.as_default():
@@ -163,6 +165,7 @@ class LongShortTMNet(object):
         try:
             with self._graph.as_default():
                 predict_label = self.model.predict_classes(input_num)
+                print("predict_label:%s" % predict_label)
         except Exception as e:
             print('[predict_label]' + str(e))
         if (predict_label is not None) or (predict_prob is not None):
@@ -195,6 +198,7 @@ class LongShortTMNet(object):
         :return:
         """
         predict_label = self.predict_label(input_num, label_dict=label_dict)
+        print("predict_label:%s" % predict_label)
         if predict_label is not None:
             predict_label_new = [num_dict[x] for x in predict_label]
             predict_str = []
@@ -214,6 +218,7 @@ class LongShortTMNet(object):
                             str_ += zip_[index][0]
                             break
                     predict_str.append(str_)
+            print("predict_str:%s" % predict_str)
             return " | ".join(predict_str)
         else:
             return ""

@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 import json
 import os
 import time
@@ -6,6 +7,8 @@ from flask import request, Response, render_template
 from lstm.lstm_net import LongShortTMNet
 from lstm.processing import DataProcessing
 from pickle import load
+import gevent
+from gevent.pywsgi import WSGIServer
 
 app = Flask(__name__)
 
@@ -56,12 +59,15 @@ def cut_word():
         if request.method == 'POST':
             if len(request.form) != 0:
                 context = request.form['sequences']
+                print("context:%s" % context)
                 start_time = time.time()
                 x_data = data_processing.predict_transform(context, vocab_dict)
+
                 result = lstm_net.cut_word(x_data, context, label_dict, num_dict)
                 end_time = time.time()
                 print("Cost time is: ", end_time - start_time)
-                return render_template('predict_message_test.html', result=result)
+                return result
+                # return render_template('predict_message_test.html', result=result)
             else:
                 data_warn = {"warning": "No words to cut!"}
                 return Response(json.dumps(data_warn))
@@ -72,4 +78,5 @@ def cut_word():
 
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5555)
+    http_server = WSGIServer(('127.0.0.1', 5555), app)
+    http_server.serve_forever()
