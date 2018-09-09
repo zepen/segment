@@ -219,6 +219,6 @@ class LongShortTMNet(object):
                             break
                     predict_str.append(str_)
             print("predict_str:%s" % predict_str)
-            return " | ".join(predict_str)
+            return predict_str
         else:
             return ""
