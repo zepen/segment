@@ -40,6 +40,9 @@
                                 <span id="download" style="cursor:pointer;margin-left: 14px" >
                                     <i class="fa fa-save"></i>
                                 </span>
+                                <span id="trash" style="cursor:pointer;margin-left: 14px">
+                                    <i class="fa fa-trash"></i>
+                                </span>
                             </h3>
                         </div>
                         <div class="panel-body" id="result_txt"></div>
@@ -79,6 +82,11 @@ $(function() {
         }else{
             console.log("结果为空!")
         }
+    });
+    $('#trash').click(function(){
+        $(".panel-body").text("")
+        $('#word').val("")
+
     });
 
 });
