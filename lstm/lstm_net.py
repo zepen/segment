@@ -218,7 +218,7 @@ class LongShortTMNet(object):
                             str_ += zip_[index][0]
                             break
                     predict_str.append(str_)
-            print("predict_str:%s" % predict_str)
+            # print("predict_str:%s" % predict_str)
             return predict_str
         else:
             return ""

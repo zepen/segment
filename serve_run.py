@@ -85,11 +85,8 @@ def cut_word_views():
                 predict_result = lstm_net.cut_word(x_data, context, label_dict, num_dict)
                 end_time = time.time()
                 print("Cost time is: ", end_time - start_time)
-
-                predict_result=" | ".join(predict_result)
-
+                predict_result = " | ".join(predict_result)
                 return predict_result
-                # return render_template('predict_message_test.html', result=" | ".join(predict_result))
             else:
                 data_warn = {"warning": "No words to cut!"}
                 return Response(json.dumps(data_warn))
