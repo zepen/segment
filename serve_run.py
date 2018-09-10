@@ -58,7 +58,7 @@ def get_cut_word():
     if request.method == 'POST':
         if len(request.data) != 0:
             context = json.loads(request.data.decode())['context']
-            print("context:%s" % context)
+            # print("context:%s" % context)
             start_time = time.time()
             x_data = data_processing.predict_transform(context, vocab_dict)
             predict_result = lstm_net.cut_word(x_data, context, label_dict, num_dict)
@@ -79,13 +79,17 @@ def cut_word_views():
         if request.method == 'POST':
             if len(request.form) != 0:
                 context = request.form['sequences']
-                print("context:%s" % context)
+                # print("context:%s" % context)
                 start_time = time.time()
                 x_data = data_processing.predict_transform(context, vocab_dict)
                 predict_result = lstm_net.cut_word(x_data, context, label_dict, num_dict)
                 end_time = time.time()
                 print("Cost time is: ", end_time - start_time)
-                return render_template('predict_message_test.html', result=" | ".join(predict_result))
+
+                predict_result=" | ".join(predict_result)
+
+                return predict_result
+                # return render_template('predict_message_test.html', result=" | ".join(predict_result))
             else:
                 data_warn = {"warning": "No words to cut!"}
                 return Response(json.dumps(data_warn))

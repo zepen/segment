@@ -37,7 +37,7 @@
                                 <span id="sub" style="cursor:pointer">
                                     <i class="fa fa-toggle-right"></i> 
                                 </span>
-                                <span id="download" style="cursor:pointer;margin-left: 10px" >
+                                <span id="download" style="cursor:pointer;margin-left: 14px" >
                                     <i class="fa fa-save"></i>
                                 </span>
                             </h3>
@@ -57,12 +57,12 @@
 $(function() {
     $('#sub').click(function() {
         $.ajax({
-            url: '/cut_word',
+            url: '/cut_word_views',
             data: {"sequences":$('#word').val()},
             type: 'POST',
             success: function(response) {
-                console.log(response);
-                $("#result_txt").val(response)
+                // console.log(response);
+                $("#result_txt").text(response)
 
             },
             error: function(error) {

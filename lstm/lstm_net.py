@@ -165,7 +165,7 @@ class LongShortTMNet(object):
         try:
             with self._graph.as_default():
                 predict_label = self.model.predict_classes(input_num)
-                print("predict_label:%s" % predict_label)
+                # print("predict_label:%s" % predict_label)
         except Exception as e:
             print('[predict_label]' + str(e))
         if (predict_label is not None) or (predict_prob is not None):
@@ -198,7 +198,7 @@ class LongShortTMNet(object):
         :return:
         """
         predict_label = self.predict_label(input_num, label_dict=label_dict)
-        print("predict_label:%s" % predict_label)
+        # print("predict_label:%s" % predict_label)
         if predict_label is not None:
             predict_label_new = [num_dict[x] for x in predict_label]
             predict_str = []
