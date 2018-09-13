@@ -47,14 +47,14 @@ def train_lstm_run(model_name):
     net.build_net(
         word_dim=100,
         max_len=7,
-        hidden_units=100,
+        hidden_units=512,
         loss='categorical_crossentropy',
         optimizer='adam'
     )
     net.model_fit(
         model_file=model_name,
         batch_size=128,
-        epochs=20
+        epochs=30
     )
 
 

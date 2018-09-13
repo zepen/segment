@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 from nltk.probability import FreqDist
 from nltk.text import Text
-from gensim.models import word2vec
+from gensim.models import Word2Vec
 from pickle import dump
 
 
@@ -20,7 +20,7 @@ class TrainWord2Vec(object):
         self._dictionary_path = 'dictionary/'
         self._w2v = None
         self._model_path = 'model/'
-        self._w2v_path = self._model_path + 'word_vector.bin'
+        self._w2v_path = self._model_path + 'word_vector.model'
         self._word2idx = {}
         self._word2idx_path = self._dictionary_path + 'word2idx.pickle'
         self._idx2word = {}
@@ -71,24 +71,68 @@ class TrainWord2Vec(object):
         :return:
         """
         corpus = [line.split() for line in self.input_text.split('\n') if line != '']
-        self._w2v = word2vec.Word2Vec(
+        print("Train is begin...")
+        self._w2v = Word2Vec(
+            sentences=corpus,
+            iter=kwargs['epochs'],
             workers=kwargs['num_workers'],
             sample=kwargs['sample'],
             size=kwargs['num_features'],
             min_count=kwargs['min_word_count'],
             window=kwargs['context']
         )
+        print("w2v train is done...")
+        self._save_w2v()
+
+    def train_on_word2vec(self, corpus, epochs):
+        """
+
+        :param corpus: 新补充的预料
+        :param epochs: 训练迭代次数
+        :return:
+        """
         np.random.shuffle(corpus)
         self._w2v.build_vocab(corpus)
         print("Train is begin...")
-        for epoch in range(kwargs['epochs']):
-            print('epoch' + str(epoch))
-            np.random.shuffle(corpus)
-            self._w2v.train(corpus, total_examples=self._w2v.corpus_count, epochs=self._w2v.iter)
-            self._w2v.alpha *= 0.9
-            self._w2v.min_alpha = self._w2v.alpha
+        np.random.shuffle(corpus)
+        self._w2v.train(corpus, total_examples=self._w2v.corpus_count, epochs=epochs)
         print("w2v train is done...")
         self._save_w2v()
+
+    def load_w2v(self):
+        try:
+            self._w2v = Word2Vec.load(self._w2v_path)
+        except Exception as e:
+            print("[load_w2v_model]" + str(e))
+
+    def check_similarity(self, vocab_1, vocab_2):
+        """
+
+        :param vocab_1: 输入待检测的词1
+        :param vocab_2: 输入待检测的词2
+        :return:
+        """
+        if self._w2v is not None:
+            if isinstance(vocab_1, str) and isinstance(vocab_2, str):
+                return self._w2v.similarity(vocab_1, vocab_2)
+            else:
+                raise Exception("The vocab_1 or vocab_2 type is wrong!")
+        else:
+            raise Exception("The w2v model is None object!")
+
+    def check_most_similar(self, vocab):
+        """
+
+        :param vocab: 输入待检测的词
+        :return:
+        """
+        if self._w2v is not None:
+            if isinstance(vocab, str):
+                return self._w2v.most_similar(vocab)
+            else:
+                raise Exception("The vocab type is wrong!")
+        else:
+            raise Exception("The w2v model is None object!")
 
     def transform_func(self):
         """ 定义 'U'为未登陆新字, 'P'为两头padding用途, 并增加两个相应的向量表示
@@ -105,7 +149,7 @@ class TrainWord2Vec(object):
         self._idx2word[char_num + 1] = u'P'
         self._save_idx2word()
         # word2idx
-        self._word2idx[u'U']=char_num
+        self._word2idx[u'U'] = char_num
         self._word2idx[u'P'] = char_num + 1
         self._save_word2idx()
         # init_weight_wv
