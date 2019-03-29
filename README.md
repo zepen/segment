@@ -16,7 +16,7 @@
 ###### step_3. 最后启动 serve_run.py 服务
 
 #### 四、模型结构
-###### 通过调用get_model_structureh函数查看
+###### 通过调用get_model_structure函数查看
 
 #### 五、超参说明
 | 超参数 | 参数说明 |
